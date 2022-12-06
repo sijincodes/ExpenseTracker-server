@@ -1,18 +1,27 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
-const Transaction = require("../models/Transaction.model")
+const Transaction = require("../models/Transaction.model");
 
-router.post("/income/create",  (req, res, next) => {
-  const { title, amount,category, date } = req.body;
+
+
+// create income
+router.post("/income/create", (req, res, next) => {
+  const {
+    transactionType,
+    transactionDescription,
+    transactionAmount,
+    category,
+    TransactionCreatedDate,
+  } = req.body;
 
   Transaction.create({
-    title,
-    amount,
+    transactionType,
+    transactionDescription,
+    transactionAmount,
     category,
-    date: new Date(moment(date).format("YYYY-MM-DD")),
+    TransactionCreatedDate: new Date(moment(date).format("YYYY-MM-DD")),
     owner: req.session.User._id,
-    
   })
     .then(() => {
       res.sendStatus(201);
@@ -22,17 +31,15 @@ router.post("/income/create",  (req, res, next) => {
     });
 });
 
-
 /* GET income Monthly */
-router.get("/income/:month",  (req, res) => {
+router.get("/income/:month", (req, res) => {
   const { month } = req.params;
   Transaction.find({
-    date: new Date(moment(2020-11-30).format("YYYY-MM-DD")).getMonth(),
-   // owner: req.session.User._id,
+    date: new Date(moment(2020 - 11 - 30).format("YYYY-MM-DD")).getMonth(),
+    // owner: req.session.User._id,
   })
     .then((incomefromDB) => {
-     res.json({key:"heelo"})
-
+      res.json({ key: "heelo" });
     })
     .catch((error) => {
       console.error("Error while retrieving income details: ", error);

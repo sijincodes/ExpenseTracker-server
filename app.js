@@ -18,6 +18,9 @@ require("./config")(app);
 const financeRoutes = require("./routes/finance.routes");
 app.use("/", financeRoutes);
 
+const categoryRoutes = require("./routes/category.routes");
+app.use("/", categoryRoutes);
+
 const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
 
