@@ -4,5 +4,5 @@ const app = require("./app");
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`.yellow.bold);
+  console.log(`Server listening on http://localhost:${PORT} BACKEND`.yellow.bold);
 });
