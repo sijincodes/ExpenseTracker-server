@@ -24,6 +24,8 @@ const transactionSchema = new Schema(
       ref: "User",
     },
     TransactionCreatedDate: Date,
+    TransactionCreatedMonth:String,
+    TransactionCreatedYear: Number,
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
