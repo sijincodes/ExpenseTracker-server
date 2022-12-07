@@ -39,22 +39,12 @@ router.post("/transaction", isAuthenticated, async (req, res, next) => {
 });
 // GET Transaction
 router.get("/transaction", isAuthenticated, async (req, res, next) => {
-  console.log(req.query);
-
+  const fetchObjects = Object.entries(req.query).map((obj) => {
+    return Object.fromEntries(new Map([obj]));
+  });
   try {
-    // const transactions = await Transaction.find({ $and : [{TransactionCreatedDate},{ userId: req.payload._id }]});
     const transactions = await Transaction.find({
-      $and: [
-        { userId: req.payload._id },
-        // ...fetchObjects,
-        // {
-        //   $and: [
-        //     { TransactionCreatedDate },
-        //     { TransactionCreatedMonth },
-        //     { TransactionCreatedYear },
-        //   ],
-        // },
-      ],
+      $and: [{ userId: req.payload._id }, ...fetchObjects],
     });
     res.status(200).json(transactions);
   } catch (error) {
