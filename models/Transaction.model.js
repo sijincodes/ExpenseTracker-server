@@ -15,7 +15,7 @@ const transactionSchema = new Schema(
       type: Number,
       required: [true, "Amount is required."],
     },
-    category: {
+    categoryId: {
       type: Schema.Types.ObjectId,
       ref: "Category",
     },

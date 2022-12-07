@@ -2,48 +2,66 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const Transaction = require("../models/Transaction.model");
+const { isAuthenticated } = require("./../middleware/jwt.middleware");
 
 
-
-// create income
-router.post("/income/create", (req, res, next) => {
-  const {
-    transactionType,
-    transactionDescription,
-    transactionAmount,
-    category,
-    TransactionCreatedDate,
-  } = req.body;
-
-  Transaction.create({
-    transactionType,
-    transactionDescription,
-    transactionAmount,
-    category,
-    TransactionCreatedDate: new Date(moment(date).format("YYYY-MM-DD")),
-    owner: req.session.User._id,
-  })
-    .then(() => {
-      res.sendStatus(201);
-    })
-    .catch((error) => {
-      next(error);
+// Create Transaction
+router.post("/transaction", isAuthenticated, async (req, res, next) => {
+  const { transactionType, transactionDescription,transactionAmount,categoryId,TransactionCreatedDate } = req.body;
+  try {
+    const transactions = await Transaction.create({
+      transactionType: transactionType,
+      transactionDescription: transactionDescription,
+      transactionAmount:transactionAmount,
+      categoryId:categoryId,
+      userId:req.payload._id,
+      TransactionCreatedDate:TransactionCreatedDate
     });
+    res.status(201).json(transactions);
+  } catch (error) {
+    next(error);
+  }
+});
+// GET Transaction
+router.get("/transaction", isAuthenticated, async (req, res, next) => {
+  const { TransactionCreatedDate} = req.query;
+  try {
+    const transactions = await Transaction.find({ $and : [{TransactionCreatedDate},{ userId: req.payload._id }]});
+    res.status(200).json(transactions);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* GET income Monthly */
-router.get("/income/:month", (req, res) => {
-  const { month } = req.params;
-  Transaction.find({
-    date: new Date(moment(2020 - 11 - 30).format("YYYY-MM-DD")).getMonth(),
-    // owner: req.session.User._id,
-  })
-    .then((incomefromDB) => {
-      res.json({ key: "heelo" });
-    })
-    .catch((error) => {
-      console.error("Error while retrieving income details: ", error);
-    });
+//Update Transaction
+
+router.put("/transaction", isAuthenticated, async (req, res, next) => {
+  const { _id } = req.query;
+  const { transactionType,transactionDescription,categoryId, transactionAmount } = req.body;
+ try {
+  const transactions = await Transaction.findByIdAndUpdate( _id,{ transactionType,transactionDescription,categoryId, transactionAmount } , { new: true })
+  transactions.save();
+  res.status(200).json(transactions);
+}
+catch (error) {
+  next(error);
+}
+
 });
+
+
+//Delete Transaction --> Need to test
+router.delete("/transaction", isAuthenticated, async (req, res) => {
+  const { _id } = req.query;
+  try {
+    const transaction = await Transaction.findByIdAndRemove(_id)
+    res.status(200).json(transaction)
+  }
+  catch (error) {
+    next(error);
+  }
+ 
+});
+
 
 module.exports = router;

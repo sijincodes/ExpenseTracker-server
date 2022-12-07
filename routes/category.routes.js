@@ -11,7 +11,7 @@ router.get("/category", isAuthenticated, async (req, res, next) => {
       type
         ? {
             $and: [
-              { categoryType: type },
+              { categoryType: type }, 
               { $or: [{ userId: null }, { userId: req.payload._id }] },
             ],
           }
@@ -38,19 +38,18 @@ router.post("/category", isAuthenticated, async (req, res, next) => {
   }
 });
 
-// Post admin static category
+// Post admin to add static category
 router.post("/admin/category", async (req, res, next) => {
-    const { categoryType, categoryName } = req.body;
-    try {
-      const categories = await Category.create({
-        categoryType: categoryType,
-        categoryName: categoryName,
-       
-      });
-      res.status(201).json(categories);
-    } catch (error) {
-      next(error);
-    }
-  });
+  const { categoryType, categoryName } = req.body;
+  try {
+    const categories = await Category.create({
+      categoryType: categoryType,
+      categoryName: categoryName,
+    });
+    res.status(201).json(categories);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
