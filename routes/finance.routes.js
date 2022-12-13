@@ -54,41 +54,49 @@ router.get("/transaction", isAuthenticated, async (req, res, next) => {
 
 //Update Transaction
 
-router.put("/transaction", isAuthenticated, async (req, res, next) => {
-  const { _id } = req.query;
-  const {
-    transactionType,
-    transactionDescription,
-    categoryId,
-    transactionAmount,
-  } = req.body;
-  try {
-    const transactions = await Transaction.findByIdAndUpdate(
-      _id,
-      {
-        transactionType,
-        transactionDescription,
-        categoryId,
-        transactionAmount,
-      },
-      { new: true }
-    );
-    transactions.save();
-    res.status(200).json(transactions);
-  } catch (error) {
-    next(error);
+router.put(
+  "/transaction/:transactionid",
+  isAuthenticated,
+  async (req, res, next) => {
+    const { transactionid } = req.params;
+    const {
+      transactionType,
+      transactionDescription,
+      categoryId,
+      transactionAmount,
+    } = req.body;
+    try {
+      const transactions = await Transaction.findByIdAndUpdate(
+        transactionid,
+        {
+          transactionType,
+          transactionDescription,
+          categoryId,
+          transactionAmount,
+        },
+        { new: true }
+      );
+      transactions.save();
+      res.status(200).json(transactions);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 //Delete Transaction --> Need to test
-router.delete("/transaction", isAuthenticated, async (req, res) => {
-  const { _id } = req.query;
-  try {
-    const transaction = await Transaction.findByIdAndRemove(_id);
-    res.status(200).json(transaction);
-  } catch (error) {
-    next(error);
+router.delete(
+  "/transaction/:transactionid",
+  isAuthenticated,
+  async (req, res) => {
+    const { transactionid } = req.params;
+    try {
+      const transaction = await Transaction.findByIdAndRemove(transactionid);
+      res.status(200).json(transaction);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 module.exports = router;
