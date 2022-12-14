@@ -11,12 +11,23 @@ router.get("/category", isAuthenticated, async (req, res, next) => {
       type
         ? {
             $and: [
-              { categoryType: type }, 
+              { categoryType: type },
               { $or: [{ userId: null }, { userId: req.payload._id }] },
             ],
           }
         : { $or: [{ userId: null }, { userId: req.payload._id }] }
     );
+    res.status(200).json(categories);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get category by id
+router.get("/category/:categoryId", isAuthenticated, async (req, res, next) => {
+  const { categoryId } = req.params;
+  try {
+    const categories = await Category.findById(categoryId);
     res.status(200).json(categories);
   } catch (error) {
     next(error);

@@ -51,7 +51,7 @@ router.get("/transaction", isAuthenticated, async (req, res, next) => {
   try {
     const transactions = await Transaction.find({
       $and: [{ userId: req.payload._id }, ...fetchObjects],
-    });
+    }).populate("categoryId");
     res.status(200).json(transactions);
   } catch (error) {
     next(error);
