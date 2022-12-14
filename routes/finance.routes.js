@@ -29,6 +29,11 @@ router.post("/transaction", isAuthenticated, async (req, res, next) => {
           month: "long",
         }
       ),
+      TransactionCreatedMonthNum: new Date(
+        TransactionCreatedDate
+      ).toLocaleString("en-us", {
+        month: "numeric",
+      }),
       TransactionCreatedYear: new Date(
         TransactionCreatedDate
       ).toLocaleDateString("en-US", { year: "numeric" }),
@@ -147,47 +152,61 @@ router.get(
 );
 
 //Fetch grouped by categories
-router.get("/analysis/categories", isAuthenticated, async (req, res, next) => {
-  const { TransactionCreatedMonth, TransactionCreatedYear } = req.query;
-
-  try {
-    const transactions = await Transaction.aggregate([
-      {
-        $match: {
-          TransactionCreatedMonth: TransactionCreatedMonth,
-          TransactionCreatedYear: Number(TransactionCreatedYear),
-          transactionType: "expense",
-          userId: mongoose.Types.ObjectId(req.payload._id),
-        },
-      },
-      {
-        $project: {
-          categoryId: 1,
-          transactionAmount: 1,
-          _id: 0,
-        },
-      },
-      {
-        $group: {
-          _id: "$categoryId",
-          total: {
-            $sum: "$transactionAmount",
+router.get(
+  "/analysis/categories/:timespan",
+  isAuthenticated,
+  async (req, res, next) => {
+    const { TransactionCreatedMonth, TransactionCreatedYear } = req.query;
+    const { timespan } = req.params;
+    let fetchObjects;
+    if (timespan === "month") {
+      fetchObjects = {
+        TransactionCreatedMonth: TransactionCreatedMonth,
+        TransactionCreatedYear: Number(TransactionCreatedYear),
+      };
+    } else {
+      fetchObjects = {
+        TransactionCreatedYear: Number(TransactionCreatedYear),
+      };
+    }
+    try {
+      const transactions = await Transaction.aggregate([
+        {
+          $match: {
+            transactionType: "expense",
+            userId: mongoose.Types.ObjectId(req.payload._id),
+            ...fetchObjects,
           },
         },
-      },
-      {
-        $sort: {
-          total: -1,
+        {
+          $project: {
+            categoryId: 1,
+            transactionAmount: 1,
+            _id: 0,
+          },
         },
-      },
-    ]);
-    res.status(200).json(transactions);
-  } catch (error) {
-    next(error);
+        {
+          $group: {
+            _id: "$categoryId",
+            total: {
+              $sum: "$transactionAmount",
+            },
+          },
+        },
+        {
+          $sort: {
+            total: -1,
+          },
+        },
+      ]);
+      res.status(200).json(transactions);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
-//Fetch grouped by categories
+//Fetch totalExpense
 router.get(
   "/analysis/totalExpense/:transactionType",
   isAuthenticated,
@@ -196,7 +215,7 @@ router.get(
     const { transactionType } = req.params;
 
     try {
-      const transactions = await Transaction.aggregate([
+      let transactions = await Transaction.aggregate([
         {
           $match: {
             TransactionCreatedYear: Number(TransactionCreatedYear),
@@ -208,12 +227,13 @@ router.get(
           $project: {
             TransactionCreatedMonth: 1,
             transactionAmount: 1,
+            TransactionCreatedMonthNum: 1,
             _id: 0,
           },
         },
         {
           $group: {
-            _id: "$TransactionCreatedMonth",
+            _id: "$TransactionCreatedMonthNum",
             total: {
               $sum: "$transactionAmount",
             },
@@ -221,10 +241,54 @@ router.get(
         },
         {
           $sort: {
-            _id: -1,
+            _id: 1,
           },
         },
       ]);
+      transactions = transactions.map((transaction) => {
+        let month;
+        switch (transaction._id) {
+          case 1:
+            month = "January";
+            break;
+          case 2:
+            month = "February";
+            break;
+          case 3:
+            month = "March";
+            break;
+          case 4:
+            month = "April";
+            break;
+          case 5:
+            month = "May";
+            break;
+          case 6:
+            month = "June";
+            break;
+          case 7:
+            month = "July";
+            break;
+          case 8:
+            month = "August";
+            break;
+          case 9:
+            month = "September";
+            break;
+          case 10:
+            month = "October";
+            break;
+          case 11:
+            month = "November";
+            break;
+          case 12:
+            month = "December";
+            break;
+          default:
+            month = "January";
+        }
+        return { ...transaction, _id: month };
+      });
       res.status(200).json(transactions);
     } catch (error) {
       next(error);

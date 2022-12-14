@@ -24,7 +24,8 @@ const transactionSchema = new Schema(
       ref: "User",
     },
     TransactionCreatedDate: Date,
-    TransactionCreatedMonth:String,
+    TransactionCreatedMonth: String,
+    TransactionCreatedMonthNum: Number,
     TransactionCreatedYear: Number,
   },
   {
