@@ -94,7 +94,7 @@ router.put(
 router.delete(
   "/transaction/:transactionid",
   isAuthenticated,
-  async (req, res) => {
+  async (req, res, next) => {
     const { transactionid } = req.params;
     try {
       const transaction = await Transaction.findByIdAndRemove(transactionid);
